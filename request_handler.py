@@ -4,11 +4,11 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from views import get_all_animals
 from views import get_all_locations
 from views import get_all_employees
-from views.animal_requests import get_single_animal, create_animal
-from views.locations_requests import get_single_location, create_location
-from views.employees_requests import get_single_employee, create_employee
+from views.animal_requests import update_animal, get_single_animal, create_animal, delete_animal
+from views.locations_requests import update_location, delete_location, get_single_location, create_location
+from views.employees_requests import update_employee, delete_employee, get_single_employee, create_employee
 from views import get_all_customers
-from views.customer_requests import get_single_customer, create_customer
+from views.customer_requests import update_customer, delete_customer, get_single_customer, create_customer
 
 
 # Here's a class. It inherits from another class.
@@ -25,14 +25,12 @@ class HandleRequests(BaseHTTPRequestHandler):
         path_params = path.split("/")
         resource = path_params[1]
         id = None
-
         try:
             id = int(path_params[2])
-        except IndexError:
+        except IndexError: #nothing at index
             pass
-        except ValueError:
+        except ValueError: #if it doesn't turn to int properly
             pass 
-
         return (resource, id)
 
     # Here's a class function
@@ -90,9 +88,7 @@ class HandleRequests(BaseHTTPRequestHandler):
                 response = f"{get_single_customer(id)}"
             else:
                 response = f"{get_all_customers()}"
-        
         self.wfile.write(response.encode())
-
         # Your new console.log() that outputs to the terminal
         print(self.path)
 
@@ -100,8 +96,8 @@ class HandleRequests(BaseHTTPRequestHandler):
     # It handles any POST request.
     def do_POST(self):
         self._set_headers(201)
-        content_len = int(self.headers.get('content-length', 0))
-        post_body = self.rfile.read(content_len)
+        content_len = int(self.headers.get('content-length', 0)) # get length of what was passed
+        post_body = self.rfile.read(content_len) # read file only reads to specified character (content_len)
 
         # Convert JSON string to a Python dictionary
         post_body = json.loads(post_body)
@@ -131,9 +127,45 @@ class HandleRequests(BaseHTTPRequestHandler):
     # It handles any PUT request.
 
     def do_PUT(self):
-        """Handles PUT requests to the server
-        """
-        self.do_POST()
+        self._set_headers(204)
+        content_len = int(self.headers.get('content-length', 0))
+        post_body = self.rfile.read(content_len)
+        post_body = json.loads(post_body)
+
+    # Parse the URL
+        (resource, id) = self.parse_url(self.path)
+
+    # Delete a single animal from the list
+        if resource == "animals":
+            update_animal(id, post_body)
+        elif resource == "locations":
+            update_location(id, post_body)
+        elif resource == "employees":
+            update_employee(id, post_body)
+        elif resource == "customers":
+            update_customer(id, post_body)
+
+    # Encode the new animal and send in response
+        self.wfile.write("".encode())
+
+    def do_DELETE(self):
+    # Set a 204 response code
+        self._set_headers(204)
+
+    # Parse the URL
+        (resource, id) = self.parse_url(self.path)
+
+    # Delete a single animal from the list
+        if resource == "animals":
+            delete_animal(id)
+        elif resource == "locations":
+            delete_location(id)
+        elif resource == "employees":
+            delete_employee(id)
+        elif resource == "customers":
+            delete_customer(id)
+    # Encode the new animal and send in response
+        self.wfile.write("".encode())
 
 
 # This function is not inside the class. It is the starting
@@ -144,7 +176,6 @@ def main():
     host = ''
     port = 8088
     HTTPServer((host, port), HandleRequests).serve_forever()
-
 
 if __name__ == "__main__":
     main()

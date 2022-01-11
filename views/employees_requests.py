@@ -113,3 +113,28 @@ def create_employee(employee):
     EMPLOYEES.append(employee)
 
     return employee
+
+def delete_employee(id):
+    # Initial -1 value for employee index, in case one isn't found
+    employee_index = -1
+
+    # Iterate the employeeS list, but use enumerate() so that you
+    # can access the index value of each item
+    for index, employee in enumerate(EMPLOYEES):
+        if employee["id"] == id:
+            # Found the animal. Store the current index.
+            employee_index = index
+
+    # If the animal was found, use pop(int) to remove it from list
+    if employee_index >= 0:
+        EMPLOYEES.pop(employee_index)
+
+def update_employee(id, new_employee):
+    # Iterate the ANIMALS list, but use enumerate() so that
+    # you can access the index value of each item.
+    for index, employee in enumerate(EMPLOYEES):
+        if employee["id"] == id:
+            # Found the animal. Update the value.
+            new_employee["id"] = id
+            EMPLOYEES[index] = new_employee
+            break
