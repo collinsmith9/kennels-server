@@ -1,107 +1,82 @@
+import sqlite3
+import json
+from models import Employee
+
 EMPLOYEES = [
-    # {
-    #   "id": 1,
-    #   "name": "Jessica Younker",
-    #   "email": "jessica@younker.com",
-    #   "employee": True
-    # },
-    # {
-    #   "id": 2,
-    #   "name": "Jordan Nelson",
-    #   "email": "jordan@nelson.com",
-    #   "employee": True
-    # },
-    # {
-    #   "id": 3,
-    #   "name": "Zoe LeBlanc",
-    #   "email": "zoe@leblanc.com",
-    #   "employee": True
-    # },
-    # {
-    #   "name": "Meg Ducharme",
-    #   "email": "meg@ducharme.com",
-    #   "id": 4,
-    #   "employee": True
-    # },
-    # {
-    #   "name": "Hannah Hall",
-    #   "email": "hannah@hall.com",
-    #   "id": 5,
-    #   "employee": True
-    # },
-    # {
-    #   "name": "Emily Lemmon",
-    #   "email": "emily@lemmon.com",
-    #   "id": 6,
-    #   "employee": True
-    # },
-    # {
-    #   "name": "Jordan Castelloe",
-    #   "email": "jordan@castelloe.com",
-    #   "id": 7,
-    #   "employee": True
-    # },
-    # {
-    #   "name": "Leah Gwin",
-    #   "email": "leah@gwin.com",
-    #   "id": 8,
-    #   "employee": True
-    # },
-    # {
-    #   "name": "Caitlin Stein",
-    #   "email": "caitlin@stein.com",
-    #   "id": 9,
-    #   "employee": True
-    # },
-    # {
-    #   "name": "Greg Korte",
-    #   "email": "greg@korte.com",
-    #   "id": 10,
-    #   "employee": True
-    # },
-    # {
-    #   "name": "Charisse Lambert",
-    #   "email": "charisse@lambert.com",
-    #   "id": 11,
-    #   "employee": True
-    # },
-    # {
-    #   "name": "Madi Peper",
-    #   "email": "madi@peper.com",
-    #   "id": 12,
-    #   "employee": True
-    # },
-    # {
-    #   "name": "Jenna Solis",
-    #   "email": "jenna@solis.com",
-    #   "id": 14,
-    #   "employee": True
-    # }
     {
-        "name": "python collin",
-        "email": "python@collin.com",
-        "id": 2,
-        "locationId": 1
+      "id": 15,
+      "name": "Ryan Tanay",
+      "address": "ryan@tanay.com"
     },
     {
-        "name": "Emma Beaton", 
-        "email": "emma@beaton.com",
-        "id": 3,
-        "locationId": 2
+      "id": 16,
+      "name": "Emma Beaton",
+      "address": "emma@beaton.com"  
     }
 ]
 
 def get_all_employees():
-    return EMPLOYEES 
+    # Open a connection to the database
+    with sqlite3.connect("./kennel.sqlite3") as conn:
+
+        # Just use these. It's a Black Box.
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor() #variable that's returned is what's used to write things to database
+
+        # Write the SQL query to get the information you want
+        db_cursor.execute("""
+        SELECT
+            e.id,
+            e.name,
+            e.address,
+            e.location_id
+        FROM Employee e
+        """)
+
+        # Initialize an empty list to hold all animal representations
+        employees = []
+
+        # Convert rows of data into a Python list
+        dataset = db_cursor.fetchall()
+
+        # Iterate list of data returned from database
+        for row in dataset:
+
+            # Create an animal instance from the current row.
+            # Note that the database fields are specified in
+            # exact order of the parameters defined in the
+            # Animal class above.
+            employee = Employee(row['id'], row['name'], row['address'], row['location_id'])
+
+            employees.append(employee.__dict__) #python __ is dunder
+    #json.dumps needs whatever is passed to be a dictionary
+    # Use `json` package to properly serialize list as JSON
+    return json.dumps(employees)
 
 def get_single_employee(id):
-    requested_employee = None
+    with sqlite3.connect("./kennel.sqlite3") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
 
-    for employee in EMPLOYEES:
-        if employee["id"] == id:
-            requested_employee = employee
+        # Use a ? parameter to inject a variable's value
+        # into the SQL statement.
+        db_cursor.execute("""
+        SELECT
+            e.id,
+            e.name,
+            e.address,
+            e.location_id
+        FROM Employee e
+        WHERE e.id = ?
+        """, ( id, ))
 
-    return requested_employee
+        # Load the single result into memory
+        data = db_cursor.fetchone()
+
+        # Create an animal instance from the current row
+        employee = Employee(data['id'], data['name'], data['address'], data['location_id'])
+
+        return json.dumps(employee.__dict__)
 
 def create_employee(employee):
     max_id = EMPLOYEES[-1]["id"]
@@ -138,3 +113,28 @@ def update_employee(id, new_employee):
             new_employee["id"] = id
             EMPLOYEES[index] = new_employee
             break
+
+def get_employee_by_location(location_id):
+    with sqlite3.connect("./kennel.sqlite3") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+
+        # Write the SQL query to get the information you want
+        db_cursor.execute("""
+        select
+            e.id,
+            e.name,
+            e.address,
+            e.location_id
+        from Employee e
+        WHERE e.location_id = ?
+        """, ( location_id, ))
+
+        employees = []
+        dataset = db_cursor.fetchall()
+
+        for row in dataset:
+            employee = Employee(row['id'], row['name'], row['address'], row['location_id'])
+            employees.append(employee.__dict__)
+
+    return json.dumps(employees)
