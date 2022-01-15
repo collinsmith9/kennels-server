@@ -65,7 +65,9 @@ def get_all_customers():
         SELECT
             c.id,
             c.name,
-            c.email
+            c.address,
+            c.email,
+            c.password
         FROM Customer c
         """)
 
@@ -82,7 +84,7 @@ def get_all_customers():
             # Note that the database fields are specified in
             # exact order of the parameters defined in the
             # Animal class above.
-            customer = Customer(row['id'], row['name'], row['email'])
+            customer = Customer(row['id'], row['name'], row['address'], row['email'], row['password'])
 
             customers.append(customer.__dict__) #python __ is dunder
     #json.dumps needs whatever is passed to be a dictionary

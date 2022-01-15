@@ -25,7 +25,8 @@ def get_all_locations():
         db_cursor.execute("""
         SELECT
             l.id,
-            l.name
+            l.name,
+            l.address
         FROM Location l
         """)
 
@@ -42,7 +43,7 @@ def get_all_locations():
             # Note that the database fields are specified in
             # exact order of the parameters defined in the
             # Animal class above.
-            location = Location(row['id'], row['name'])
+            location = Location(row['id'], row['name'], row['address'])
 
             locations.append(location.__dict__) #python __ is dunder
     #json.dumps needs whatever is passed to be a dictionary
@@ -59,7 +60,8 @@ def get_single_location(id):
         db_cursor.execute("""
         SELECT
             l.id,
-            l.name
+            l.name,
+            l.address
         FROM location l
         WHERE l.id = ?
         """, ( id, ))
@@ -68,7 +70,7 @@ def get_single_location(id):
         data = db_cursor.fetchone()
 
         # Create an animal instance from the current row
-        location = Location(data['id'], data['name'])
+        location = Location(data['id'], data['name'], data['address'])
 
         return json.dumps(location.__dict__)
 
