@@ -4,7 +4,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from views import get_all_animals
 from views import get_all_locations
 from views import get_all_employees
-from views.animal_requests import update_animal, get_single_animal, create_animal, delete_animal, get_animal_by_location
+from views.animal_requests import update_animal, get_single_animal, create_animal, delete_animal, get_animal_by_location, get_animal_by_status
 from views.locations_requests import update_location, delete_location, get_single_location, create_location
 from views.employees_requests import update_employee, delete_employee, get_single_employee, create_employee, get_employee_by_location
 from views import get_all_customers, get_customers_by_email
@@ -126,6 +126,8 @@ class HandleRequests(BaseHTTPRequestHandler):
                 response = get_customers_by_email(value)
             elif key == "location_id" and resource == "animals":
                 response = get_animal_by_location(int(value))
+            elif key == "status" and resource == "animals":
+                response = get_animal_by_status(value)
             elif key == "location_id" and resource == "employees":
                 response = get_employee_by_location(int(value))
 
