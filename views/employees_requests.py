@@ -51,7 +51,7 @@ def get_all_employees():
             # exact order of the parameters defined in the
             # Animal class above.
             employee = Employee(row['id'], row['name'], row['address'], row['location_id'])
-            location = Location(row['id'], row['location_name'], row['location_address'])
+            location = Location(row['location_id'], row['location_name'], row['location_address'])
 
             employee.location = location.__dict__
 
