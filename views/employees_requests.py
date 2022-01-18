@@ -85,16 +85,30 @@ def get_single_employee(id):
 
         return json.dumps(employee.__dict__)
 
-def create_employee(employee):
-    max_id = EMPLOYEES[-1]["id"]
+def create_employee(new_employee):
+    with sqlite3.connect("./kennel.sqlite3") as conn:
+        db_cursor = conn.cursor()
 
-    new_id = max_id + 1
+        db_cursor.execute("""
+        INSERT INTO Employee
+            ( name, address, location_id)
+        VALUES
+            ( ?, ?, ? );
+        """, (new_employee['name'], new_employee['address'], new_employee['location_id']))
 
-    employee["id"] = new_id
+        # The `lastrowid` property on the cursor will return
+        # the primary key of the last thing that got added to
+        # the database.
+        id = db_cursor.lastrowid
 
-    EMPLOYEES.append(employee)
+        # Add the `id` property to the animal dictionary that
+        # was sent by the client so that the client sees the
+        # primary key in the response.
+        new_employee['id'] = id
 
-    return employee
+
+    return json.dumps(new_employee)
+    
 
 def delete_employee(id):
     # Initial -1 value for employee index, in case one isn't found
